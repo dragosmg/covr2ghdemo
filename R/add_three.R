@@ -1,4 +1,4 @@
-#' Add two to a numeric vector
+#' Add three to a numeric vector
 #'
 #' @inheritParams add_one
 #'
@@ -7,7 +7,7 @@
 #' @export
 #' @examples
 #' add_two(2)
-add_two <- function(x) {
+add_three <- function(x) {
   if (!rlang::is_double(x)) {
     cli::cli_abort(
       "`x` must be numeric. You supplied a {.class {class(x)}}"
@@ -15,6 +15,6 @@ add_two <- function(x) {
   }
 
   x |>
-    add_one() |>
+    add_two() |>
     add_one()
 }
