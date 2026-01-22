@@ -104,8 +104,6 @@ jobs:
 
       - name: Download head coverage result
         uses: actions/download-artifact@v5
-        with:
-          path: .
 
       - name: Print coverage
         run: |
@@ -120,8 +118,8 @@ jobs:
           print(owner_repo[[2]])
 
           github_comment <- covr2md::compose_comment(
-            head_coverage = head_cov,
-            base_coverage = base_cov,
+            head_coverage = head_coverage,
+            base_coverage = base_coverage,
             owner = owner_repo[[1]],
             repo = owner_repo[[2]],
             pr_number = ${{ github.event.pull_request.number }}
@@ -129,23 +127,3 @@ jobs:
 
           print(github_comment)
         shell: Rscript {0}
-    #   - name: Upload math result for job 2
-    #     uses: actions/upload-artifact@v4
-    #     with:
-    #       name: homework_final
-    #       path: math-homework.txt
-
-#   job_3:
-#     name: Display results
-#     needs: job_2
-#     runs-on: macOS-latest
-#     steps:
-#       - name: Download math result for job 2
-#         uses: actions/download-artifact@v5
-#         with:
-#           name: homework_final
-#       - name: Print the final result
-#         shell: bash
-#         run: |
-#           value=`cat math-homework.txt`
-#           echo The result is $value
