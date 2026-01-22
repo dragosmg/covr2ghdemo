@@ -127,7 +127,7 @@ jobs:
 
           print(comment_id)
 
-          post_comment(
+          covr2md::post_comment(
             github_comment,
             repo = "${{ github.repository }}",
             pr_number = ${{ github.event.pull_request.number }},
