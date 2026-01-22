@@ -97,6 +97,7 @@ jobs:
           packages: |
             any::covr
             github::dragosmg/covr2md
+            any::stringr
 
       - name: Download head coverage result
         uses: actions/download-artifact@v5
@@ -110,6 +111,20 @@ jobs:
           print(head_coverage)
           base_coverage <- readRDS("base_coverage/base_cov.RDS")
           print(base_coverage)
+
+          owner_repo <- stringr::str_split_1("${{ github.repository }}", "/")
+          print(owner_repo[[1]])
+          print(owner_repo[[2]])
+
+          github_comment <- covr2md::compose_comment(
+            head_coverage = head_cov,
+            base_coverage = base_cov,
+            owner = owner_repo[[1]],
+            repo = owner_repo[[2]],
+            pr_number = ${{ github.event.pull_request.number }}
+          )
+
+          print(github_comment)
         shell: Rscript {0}
     #   - name: Upload math result for job 2
     #     uses: actions/upload-artifact@v4
