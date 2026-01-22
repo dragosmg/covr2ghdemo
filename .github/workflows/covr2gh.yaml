@@ -127,7 +127,7 @@ jobs:
 
           comment_id <- get_comment_id(
             owner = owner_repo[[1]],
-            repo = "owner_repo[[2]],
+            repo = owner_repo[[2]],
             pr_number = ${{ github.event.pull_request.number }}
           )
 
@@ -138,6 +138,6 @@ jobs:
             owner = owner_repo[[1]],
             repo = owner_repo[[2]],
             pr_number = ${{ github.event.pull_request.number }},
-            comment_id = 123456789
+            comment_id = comment_id
           )
         shell: Rscript {0}
