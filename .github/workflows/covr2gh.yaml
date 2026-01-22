@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   job_1:
-    name: Setup
+    name: Calculate coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout head branch
@@ -25,7 +25,7 @@ jobs:
             any::fs
           needs: coverage
 
-      - name: Test coverage
+      - name: Calculate head coverage
         shell: Rscript {0}
         run: |
           file_path <- file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
@@ -45,6 +45,32 @@ jobs:
         with:
           name: head_coverage
           path: head_cov.RDS
+
+      - name: Checkout base / target branch
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Calculate head coverage
+        shell: Rscript {0}
+        run: |
+          file_path <- file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
+
+          base_cov <- covr::package_coverage(
+            quiet = FALSE,
+            clean = TRUE,
+            install_path = file_path
+          )
+
+          print(base_cov)
+
+          saveRDS(basecov, "base_cov.RDS")
+
+      - name: Upload coverage result for base
+        uses: actions/upload-artifact@v4
+        with:
+          name: base_coverage
+          path: base_cov.RDS
 
   job_2:
     name: Print total head coverage
