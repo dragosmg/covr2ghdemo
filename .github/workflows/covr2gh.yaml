@@ -51,7 +51,7 @@ jobs:
         with:
           ref: main
 
-      - name: Calculate head coverage
+      - name: Calculate base coverage
         shell: Rscript {0}
         run: |
           file_path <- file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
@@ -64,7 +64,7 @@ jobs:
 
           print(base_cov)
 
-          saveRDS(basecov, "base_cov.RDS")
+          saveRDS(base_cov, "base_cov.RDS")
 
       - name: Upload coverage result for base
         uses: actions/upload-artifact@v4
@@ -82,14 +82,26 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Setup R dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::covr
+            github::dragosmg/covr2md
+            any::stringr
+            any::fs
+          needs: coverage
+
       - name: Download head coverage result
         uses: actions/download-artifact@v5
         with:
-          name: head_coverage
+          name: head_coverage, base_coverage
       - name: Print coverage
         run: |
           head_coverage <- readRDS("head_cov.RDS")
           print(head_coverage)
+          base_coverage <- readRDS("base_cov.RDS")
+          print(base_coverage)
         shell: Rscript {0}
     #   - name: Upload math result for job 2
     #     uses: actions/upload-artifact@v4
