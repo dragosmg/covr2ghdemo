@@ -10,7 +10,8 @@
 add_one <- function(x) {
   if (!is.numeric(x)) {
     cli::cli_abort(
-      "`x` must be numeric. You supplied a {.class {class(x)}}"
+      "`x` must be numeric. You supplied a {.class {class(x)}}",
+      call = rlang::caller_env()
     )
   }
   x + 1

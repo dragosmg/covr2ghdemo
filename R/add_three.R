@@ -8,13 +8,14 @@
 #' @examples
 #' add_three(2)
 add_three <- function(x) {
-  if (!rlang::is_double(x)) {
+  if (!is.numeric(x)) {
     cli::cli_abort(
       "`x` must be numeric. You supplied a {.class {class(x)}}"
     )
   }
 
   x |>
-    add_two() |>
+    add_one() |>
+    add_one() |>
     add_one()
 }
