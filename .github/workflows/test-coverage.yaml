@@ -155,6 +155,3 @@ jobs:
         with:
           name: coverage-test-failures
           path: ${{ runner.temp }}/package
-
-      - name: Upload coverage data
-        if: github.event_name != 'pull_request'
