@@ -28,7 +28,9 @@ jobs:
       - name: Setup R dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::covr
+          extra-packages: |
+            any::covr
+            dragosmg/covr2md
           needs: coverage
 
       - name: Calculate head coverage
