@@ -114,7 +114,7 @@ jobs:
           git pull origin covr2gh-storage
 
           mkdir -p "badges/${{ github.head_ref }}_${{ github.sha}}"
-          cp "head_coverage/coverage_badge.svg" "badges/${{ github.head_ref }}_${{ github.sha}}/coverage_badge.svg"
+          cp "../head_coverage/coverage_badge.svg" "badges/${{ github.head_ref }}_${{ github.sha}}/coverage_badge.svg"
 
           git add "badges/${{ github.head_ref }}_${{ github.sha }}/coverage_badge.svg"
 
