@@ -119,7 +119,9 @@ jobs:
       - name: Re-install R dependencies  # in case there are any differences in deps
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::covr
+          extra-packages: |
+            any::covr
+            dragosmg/covr2gh=?reinstall
           needs: coverage
 
       - name: Calculate base coverage
