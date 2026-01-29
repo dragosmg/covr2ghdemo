@@ -70,6 +70,8 @@ jobs:
 
       - name: Initialise storage branch
         run: |
+          # fetch updates, switch to the branch (creating it if needed)
+          # and rebase on the remote branch
           git fetch origin covr2gh-storage || true
           git switch covr2gh-storage || git checkout --orphan covr2gh-storage
           git pull --rebase origin covr2gh-storage || true
@@ -99,11 +101,11 @@ jobs:
       - name: Commit badge
         working-directory: badges
         run: |
-          git switch covr2gh-storage || true
+          # git switch covr2gh-storage || true
           git pull origin covr2gh-storage
 
           mkdir -p "badges/${{ github.head_ref }}_${{ github.sha}}"
-          cp "coverage_badge.svg" "badges/${{ github.head_ref }}_${{ github.sha}}/coverage_badge.svg"
+          cp "head_coverage/coverage_badge.svg" "badges/${{ github.head_ref }}_${{ github.sha}}/coverage_badge.svg"
 
           git add "badges/${{ github.head_ref }}_${{ github.sha }}/badge.svg"
 
