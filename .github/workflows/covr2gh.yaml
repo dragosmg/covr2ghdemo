@@ -45,19 +45,11 @@ jobs:
             install_path = file_path
           )
 
-          print(head_cov)
-
           saveRDS(head_cov, "head_cov.RDS")
 
           coverage_perc <- covr::percent_coverage(head_cov)
 
-          print(
-            glue::glue("Coverage is: {round(coverage_perc)}%.")
-          )
-
           coverage_badge <- covr2gh::generate_badge(coverage_perc)
-
-          print(coverage_badge)
 
           badge_path <- file.path(temp_path, "coverage_badge.svg")
 
