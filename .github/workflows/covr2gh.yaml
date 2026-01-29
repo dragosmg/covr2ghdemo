@@ -69,8 +69,8 @@ jobs:
 
       - name: Initialise storage branch
         run: |
-          # fetch updates, switch to the branch (creating it if needed)
-          # and rebase on the remote branch
+          # fetch & switch | create the covr2gh-storage branch
+          # rebase if needed
           git fetch origin covr2gh-storage || true
           git switch covr2gh-storage || git checkout --orphan covr2gh-storage
           git pull --rebase origin covr2gh-storage || true
@@ -101,6 +101,7 @@ jobs:
         working-directory: badges
         run: |
           # already on the covr2gh-storage branch
+          # so no need to checkout the branch
 
           mkdir -p "${{ github.head_ref }}"
           cp "$RUNNER_TEMP/coverage_badge.svg" "${{ github.head_ref }}/coverage_badge.svg"
@@ -114,7 +115,7 @@ jobs:
       - name: Checkout base / target branch
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.base_ref }}
 
       - name: Re-install R dependencies  # in case there are any differences in deps
         uses: r-lib/actions/setup-r-dependencies@v2
@@ -148,21 +149,13 @@ jobs:
 
       - name: Post coverage comment
         run: |
-          # old paths
-          # head_cov_path <- "head_coverage/head_cov.RDS"
-          # base_cov_path <- "base_coverage/base_cov.RDS"
-
-          # new paths
+          # paths
           temp_path <- normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/")
           head_cov_path <- file.path(temp_path, "head_cov.RDS")
           base_cov_path <- file.path(temp_path, "base_cov.RDS")
 
-          library(covr) # for the print method
-
           head_coverage <- readRDS(head_cov_path)
-          print(head_coverage)
           base_coverage <- readRDS(base_cov_path)
-          print(base_coverage)
 
           github_comment <- covr2gh::compose_comment(
             head_coverage = head_coverage,
@@ -176,9 +169,6 @@ jobs:
             pr_number = ${{ github.event.pull_request.number }}
           )
 
-          glue::glue("Comment ID is: {comment_id}", .null = "`NULL`") |>
-            print()
-
           covr2gh::post_comment(
             github_comment,
             repo = "${{ github.repository }}",
@@ -186,3 +176,11 @@ jobs:
             comment_id = comment_id
           )
         shell: Rscript {0}
+
+      - name: Job summary
+        run: |
+          echo "This is the lead in sentence for the list" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- Lets add a bullet point" >> $GITHUB_STEP_SUMMARY
+          echo "- Lets add a second bullet point" >> $GITHUB_STEP_SUMMARY
+          echo "- How about a third one?" >> $GITHUB_STEP_SUMMARY
