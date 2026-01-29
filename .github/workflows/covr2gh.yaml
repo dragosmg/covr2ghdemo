@@ -63,13 +63,11 @@ jobs:
 
           writeLines(coverage_badge, badge_path)
 
-      - name: Upload coverage result and badge for head
+      - name: Upload coverage result for head
         uses: actions/upload-artifact@v6
         with:
           name: head_coverage
-          path: |
-            head_cov.RDS
-            coverage_badge.svg
+          path: head_cov.RDS
           retention-days: 5
 
       - name: Configure git identity
@@ -103,7 +101,7 @@ jobs:
           cp -r /tmp/${{ github.sha }}/.git /tmp/${{ github.sha }}/README.md /tmp/${{ github.sha }}/badges .
           rm -rf /tmp/${{ github.sha }}
           git add --all -f
-          git commit -m "Update storage branch: $(date)" || true
+          git commit -m "Update storage branch: $( + '%Y-%m-%d %H:%M')" || true
           git push -u origin covr2gh-storage
         shell: bash
 
@@ -116,10 +114,10 @@ jobs:
           # git switch covr2gh-storage || true
           git pull origin covr2gh-storage
 
-          mkdir -p "badges/${{ github.head_ref }}_${{ github.sha}}"
-          cp "$RUNNER_TEMP/coverage_badge.svg" "badges/${{ github.head_ref }}_${{ github.sha}}/coverage_badge.svg"
+          mkdir -p "badges/${{ github.head_ref }}"
+          cp "$RUNNER_TEMP/coverage_badge.svg" "badges/${{ github.head_ref }}/coverage_badge.svg"
 
-          git add "badges/${{ github.head_ref }}_${{ github.sha }}/coverage_badge.svg"
+          git add "badges/${{ github.head_ref }}/coverage_badge.svg"
 
           # git config --local user.email "action@github.com"
           # git config --local user.name "GitHub Actions"
