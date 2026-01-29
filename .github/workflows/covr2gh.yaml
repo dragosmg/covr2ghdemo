@@ -97,8 +97,6 @@ jobs:
           git push -u origin covr2gh-storage
         shell: bash
 
-      - name: Download coverage results
-        uses: actions/download-artifact@v7
 
       - name: Commit badge
         working-directory: badges
