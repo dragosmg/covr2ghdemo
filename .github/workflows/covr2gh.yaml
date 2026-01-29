@@ -97,20 +97,15 @@ jobs:
           git push -u origin covr2gh-storage
         shell: bash
 
-
       - name: Commit badge
         working-directory: badges
         run: |
-          # git switch covr2gh-storage || true
-          git pull origin covr2gh-storage
+          # already on the covr2gh-storage branch
 
           mkdir -p "${{ github.head_ref }}"
           cp "$RUNNER_TEMP/coverage_badge.svg" "${{ github.head_ref }}/coverage_badge.svg"
 
           git add "${{ github.head_ref }}/coverage_badge.svg"
-
-          # git config --local user.email "action@github.com"
-          # git config --local user.name "GitHub Actions"
 
           git commit -m "Add/Update badge: ${{ github.sha }}" || true
           git push
