@@ -59,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: head_coverage
-          path: $RUNNER_TEMP/head_cov.RDS
+          path: ${{ runner.temp }}/head_cov.RDS
           retention-days: 5
 
       - name: Configure git identity
@@ -141,7 +141,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: base_coverage
-          path: $RUNNER_TEMP/base_cov.RDS
+          path: ${{ runner.temp }}/base_cov.RDS
           retention-days: 5
 
   job2:
