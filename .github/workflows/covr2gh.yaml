@@ -6,11 +6,11 @@ on:
   pull_request:
 
 permissions:
-  pull-requests: write
-  contents: read
+  pull-requests: write # for commenting on PR
+  contents: write
 
 jobs:
-  job_1:
+  job1:
     name: Calculate coverage
     runs-on: ubuntu-latest
     env:
@@ -48,25 +48,18 @@ jobs:
 
           saveRDS(head_cov, "head_cov.RDS")
 
-          coverage <- covr::percent_coverage(head_cov)
-          coverage_badge <- covr2md::generate_badge(coverage)
-
-          writeLines(coverage_badge, "badge.svg")
-
       - name: Upload coverage result and badge for head
         uses: actions/upload-artifact@v6
         with:
           name: head_coverage
-          path: |
-            head_cov.RDS
-            badge.svg
+          path: head_cov.RDS
 
       - name: Checkout base / target branch
         uses: actions/checkout@v6
         with:
           ref: main
 
-      - name: Re-install R dependencies
+      - name: Re-install R dependencies  # in case there are any differences in deps
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::covr
@@ -93,9 +86,9 @@ jobs:
           name: base_coverage
           path: base_cov.RDS
 
-  job_2:
+  job2:
     name: Post coverage summary comment
-    needs: job_1
+    needs: job1
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -112,7 +105,7 @@ jobs:
           pak-version: stable
           packages: |
             any::covr
-            github::dragosmg/covr2md
+            github::dragosmg/covr2gh
             any::stringr
 
       - name: Download coverage results
@@ -126,21 +119,27 @@ jobs:
           base_coverage <- readRDS("base_coverage/base_cov.RDS")
           print(base_coverage)
 
-          github_comment <- covr2md::compose_comment(
+          coverage_badge <- head_coverage |>
+            covr::percent_coverage() |>
+            covr2gh::generate_badge()
+
+          writeLines(coverage_badge, "badge.svg")
+
+          github_comment <- covr2gh::compose_comment(
             head_coverage = head_coverage,
             base_coverage = base_coverage,
             repo = "${{ github.repository }}",
             pr_number = ${{ github.event.pull_request.number }}
           )
 
-          comment_id <- covr2md::get_comment_id(
+          comment_id <- covr2gh::get_comment_id(
             repo = "${{ github.repository }}",
             pr_number = ${{ github.event.pull_request.number }}
           )
 
           print(comment_id)
 
-          covr2md::post_comment(
+          covr2gh::post_comment(
             github_comment,
             repo = "${{ github.repository }}",
             pr_number = ${{ github.event.pull_request.number }},
