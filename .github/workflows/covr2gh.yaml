@@ -101,7 +101,7 @@ jobs:
         working-directory: badges
         run: |
           # already on the covr2gh-storage branch
-          # so no need to checkout the branch
+          # so no need for checkout
 
           mkdir -p "${{ github.head_ref }}"
           cp "$RUNNER_TEMP/coverage_badge.svg" "${{ github.head_ref }}/coverage_badge.svg"
