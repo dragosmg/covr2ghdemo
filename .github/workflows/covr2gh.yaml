@@ -1,4 +1,4 @@
-name: Coverage summary
+name: covr2gh summary
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   covr2gh:
-    name: Calculate coverage & post comment
+    name: Assess coverage & post comment
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
