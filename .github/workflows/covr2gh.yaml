@@ -30,7 +30,7 @@ jobs:
         with:
           extra-packages: |
             any::covr
-            dragosmg/covr2gh
+            dragosmg/covr2gh@message-template
           needs: coverage
 
       - name: Calculate head coverage & make badge
@@ -122,7 +122,7 @@ jobs:
         with:
           extra-packages: |
             any::covr
-            dragosmg/covr2gh
+            dragosmg/covr2gh@message-template
           needs: coverage
 
       - name: Calculate base coverage
