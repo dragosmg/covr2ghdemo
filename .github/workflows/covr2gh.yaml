@@ -69,7 +69,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Actions"
 
-      - name: Attach storage worktree
+      - name: Attach storage worktree (orphan if missing)
         run: |
           git fetch origin covr2gh-storage || true
 
