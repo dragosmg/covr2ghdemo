@@ -221,13 +221,47 @@ jobs:
           writeLines(main_cov_badge, badge_path)
         shell: Rscript {0}
 
-      - name: Commit badge
+      - name: Configure git identity
         run: |
-          git switch covr2gh-storage || true
-          git pull origin covr2gh-storage
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Actions"
 
-          mkdir -p "badges/${{ github.ref_name }}"
-          cp "$RUNNER_TEMP/coverage_badge.svg" "badges/${{ github.ref_name }}/coverage_badge.svg"
+      - name: Initialise / switch branch
+        run: |
+          git fetch origin covr2gh-storage || true
+          git switch covr2gh-storage || git checkout --orphan covr2gh-storage
+          git pull --rebase origin covr2gh-storage || true
+
+          # Ensure that the bare minimum components exist in the branch
+          mkdir -p badges
+          touch README.md badges/.gitkeep
+
+          # Copy necessary files and folders to a temporary location
+          mkdir -p /tmp/${{ github.sha }}
+          echo "Copying badges/ to /tmp/${{ github.sha }}"
+          cp -r .git README.md badges /tmp/${{ github.sha }}
+
+          # Remove everything else
+          # Attribution: https://unix.stackexchange.com/a/77313
+          rm -rf ..?* .[!.]* *
+
+          # Restore files from the temporary location
+          echo "Copying badges/ from /tmp/${{ github.sha }}"
+          cp -r /tmp/${{ github.sha }}/.git /tmp/${{ github.sha }}/README.md /tmp/${{ github.sha }}/badges .
+          rm -rf /tmp/${{ github.sha }}
+          git add --all -f
+          git commit -m "Update storage branch: $( + '%Y-%m-%d %H:%M')" || true
+          git push -u origin covr2gh-storage
+        shell: bash
+
+      - name: Commit badge
+        working-directory: badges
+        run: |
+          # already on the covr2gh-storage branch
+          # so no need for checkout
+
+          mkdir -p "${{ github.ref_name }}"
+          cp "$RUNNER_TEMP/coverage_badge.svg" "${{ github.ref_name }}/coverage_badge.svg"
 
           git add "${{ github.ref_name }}/coverage_badge.svg"
 
