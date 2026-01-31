@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      BADGE_BRANCH: ${{ github.head_ref }}
 
     steps:
       - name: Checkout head branch
@@ -68,50 +69,56 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Actions"
 
-      - name: Initialise storage branch
+      - name: Attach storage worktree
         run: |
-          # fetch & switch | create the covr2gh-storage branch
-          # rebase if needed
           git fetch origin covr2gh-storage || true
-          git switch covr2gh-storage || git checkout --orphan covr2gh-storage
-          git pull --rebase origin covr2gh-storage || true
 
-          # Ensure that the bare minimum components exist in the branch
-          mkdir -p badges
-          touch README.md badges/.gitkeep
+          if git show-ref --verify --quiet refs/remotes/origin/covr2gh-storage; then
+            echo "Storage branch exists"
+            git worktree add storage covr2gh-storage
+          else
+            echo "Creating orphan storage branch"
+            git worktree add --orphan covr2gh-storage storage
+            cd storage
 
-          # Copy necessary files and folders to a temporary location
-          mkdir -p /tmp/${{ github.sha }}
-          echo "Copying badges/ to /tmp/${{ github.sha }}"
-          cp -r .git README.md badges /tmp/${{ github.sha }}
+            mkdir -p badges
+            echo "# Coverage badges" > README.md
 
-          # Remove everything else
-          # Attribution: https://unix.stackexchange.com/a/77313
-          rm -rf ..?* .[!.]* *
-
-          # Restore files from the temporary location
-          echo "Copying badges/ from /tmp/${{ github.sha }}"
-          cp -r /tmp/${{ github.sha }}/.git /tmp/${{ github.sha }}/README.md /tmp/${{ github.sha }}/badges .
-          rm -rf /tmp/${{ github.sha }}
-          git add --all -f
-          git commit -m "Update storage branch: $(date + '%Y-%m-%d %H:%M')" || true
-          git push -u origin covr2gh-storage
-        shell: bash
+            git add .
+            git commit -m "Initialize covr2gh-storage branch"
+            git push origin covr2gh-storage
+          fi
 
       - name: Commit badge
-        working-directory: badges
+        working-directory: storage
         run: |
-          # already on the covr2gh-storage branch
-          # so no need for checkout
+          mkdir -p "badges/$BADGE_BRANCH"
+          cp "$RUNNER_TEMP/coverage_badge.svg" \
+              "badges/$BADGE_BRANCH/coverage_badge.svg"
 
-          mkdir -p "${{ github.head_ref }}"
-          cp "$RUNNER_TEMP/coverage_badge.svg" "${{ github.head_ref }}/coverage_badge.svg"
+          git add badges
+          git commit -m "Update badge for $BADGE_BRANCH ($GITHUB_SHA)" || true
 
-          git add "${{ github.head_ref }}/coverage_badge.svg"
+          if ! git push origin covr2gh-storage; then
+            echo "Push rejected (likely branch protection); skipping"
+            exit 0
+          fi
 
-          git commit -m "Add/Update badge: ${{ github.sha }}" || true
-          git push
-        shell: bash
+
+      # - name: Commit badge
+      #   working-directory: badges
+      #   run: |
+      #     # already on the covr2gh-storage branch
+      #     # so no need for checkout
+
+      #     mkdir -p "${{ github.head_ref }}"
+      #     cp "$RUNNER_TEMP/coverage_badge.svg" "${{ github.head_ref }}/coverage_badge.svg"
+
+      #     git add "${{ github.head_ref }}/coverage_badge.svg"
+
+      #     git commit -m "Add/Update badge: ${{ github.sha }}" || true
+      #     git push
+      #   shell: bash
 
       - name: Checkout base / target branch
         uses: actions/checkout@v6
@@ -185,6 +192,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      BAGDE_BRANCH: ${{ github.ref_name }}
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v6
