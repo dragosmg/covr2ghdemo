@@ -165,16 +165,10 @@ jobs:
             pr_number = ${{ github.event.pull_request.number }}
           )
 
-          comment_id <- covr2gh::get_comment_id(
-            repo = "${{ github.repository }}",
-            pr_number = ${{ github.event.pull_request.number }}
-          )
-
-          post_response <- covr2gh::post_comment(
+          covr2gh::post_comment(
             comment,
             repo = "${{ github.repository }}",
-            pr_number = ${{ github.event.pull_request.number }},
-            comment_id = comment_id
+            pr_number = ${{ github.event.pull_request.number }}
           )
 
           writeLines(comment, comment_path)
