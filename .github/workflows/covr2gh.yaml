@@ -78,8 +78,10 @@ jobs:
             git worktree add storage covr2gh-storage
           else
             echo "Creating orphan storage branch"
-            git worktree add --orphan covr2gh-storage storage
-            cd storage
+
+            # Create orphan branch in main repo
+            git checkout --orphan covr2gh-storage
+            git reset --hard
 
             mkdir -p badges
             echo "# Coverage badges" > README.md
@@ -87,6 +89,12 @@ jobs:
             git add .
             git commit -m "Initialize covr2gh-storage branch"
             git push origin covr2gh-storage
+
+            # Switch back to original branch
+            git checkout -
+
+            # Attach worktree
+            git worktree add storage covr2gh-storage
           fi
 
       - name: Commit badge
@@ -192,7 +200,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      BAGDE_BRANCH: ${{ github.ref_name }}
+      BADGE_BRANCH: ${{ github.ref_name }}
 
     steps:
       - name: Checkout repo
