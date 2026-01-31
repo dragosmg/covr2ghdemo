@@ -1,9 +1,6 @@
 name: Coverage summary
 
-on:
-  push:
-    branches: [main]
-  pull_request:
+on: workflow_dispatch
 
 permissions:
   pull-requests: write # for commenting on PR
