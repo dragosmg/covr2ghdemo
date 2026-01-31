@@ -64,10 +64,12 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Actions"
 
-      - name: Attach / create storage branch (worktree)
+      - name: Storage branch (worktree)
+        if: github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request'
         run: |
           ORIGINAL_REF="${GITHUB_REF_NAME}"
 
+          # Attach or create storage branch
           git fetch origin covr2gh-storage || true
 
           if git show-ref --verify --quiet refs/remotes/origin/covr2gh-storage; then
@@ -86,9 +88,7 @@ jobs:
             git worktree add storage covr2gh-storage
           fi
 
-      - name: Acquire storage lock
-        working-directory: storage
-        run: |
+          # Acquire storage lock with retry/backoff
           LOCK_FILE=".lock"
           RETRIES=0
           while [ $RETRIES -lt $LOCK_MAX_RETRIES ]; do
@@ -103,27 +103,19 @@ jobs:
               sleep $LOCK_SLEEP
             fi
           done
-
           if [ $RETRIES -eq $LOCK_MAX_RETRIES ]; then
             echo "Could not acquire lock after $LOCK_MAX_RETRIES attempts, exiting."
             exit 1
           fi
 
-      - name: Commit badge
-        working-directory: storage
-        run: |
+          # Commit badge
           mkdir -p "badges/$BADGE_BRANCH"
-          cp "$RUNNER_TEMP/coverage_badge.svg" \
-              "badges/$BADGE_BRANCH/coverage_badge.svg"
-
+          cp "$RUNNER_TEMP/coverage_badge.svg" "badges/$BADGE_BRANCH/coverage_badge.svg"
           git add badges
           git commit -m "Update badge for $BADGE_BRANCH ($GITHUB_SHA)" || true
           git push origin covr2gh-storage || true
 
-      - name: Release storage lock
-        if: always()
-        working-directory: storage
-        run: |
+          # Release lock
           git rm -f .lock || true
           git commit -m "Release storage lock ($GITHUB_RUN_ID)" || true
           git push origin covr2gh-storage || true
