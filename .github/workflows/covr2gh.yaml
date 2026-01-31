@@ -71,6 +71,8 @@ jobs:
 
       - name: Attach storage worktree (orphan if missing)
         run: |
+          ORIGINAL_REF=$(git symbolic-ref --short HEAD)
+
           git fetch origin covr2gh-storage || true
 
           if git show-ref --verify --quiet refs/remotes/origin/covr2gh-storage; then
@@ -91,7 +93,7 @@ jobs:
             git push origin covr2gh-storage
 
             # Switch back to original branch
-            git checkout -
+            git checkout "$ORIGINAL_REF"
 
             # Attach worktree
             git worktree add storage covr2gh-storage
