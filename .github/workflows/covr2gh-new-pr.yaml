@@ -2,7 +2,7 @@ name: Coverage summary
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
 
 permissions:
@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          # this seems superfluous - by default the action will check out the correct commit
           ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Setup R
@@ -41,23 +42,20 @@ jobs:
       - name: Head coverage & badge
         run: |
           temp_path <- normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/")
-          pkg_path <- file.path(temp_path, "package_head")
-          head_cov_path <- file.path(temp_path, "head_cov.RDS")
-          badge_path <- file.path(temp_path, "coverage_badge.svg")
 
           head_cov <- covr::package_coverage(
             quiet = FALSE,
             clean = FALSE,
-            install_path = pkg_path
+            install_path = file.path(temp_path, "package_head")
           )
 
-          saveRDS(head_cov, head_cov_path)
+          saveRDS(head_cov, file.path(temp_path, "head_cov.RDS"))
 
           badge <- head_cov |>
             covr::percent_coverage() |>
             covr2gh::generate_badge()
 
-          writeLines(badge, badge_path)
+          writeLines(badge, file.path(temp_path, "coverage_badge.svg"))
         shell: Rscript {0}
 
       - name: Configure git identity
@@ -80,8 +78,11 @@ jobs:
             git reset --hard
 
             mkdir -p badges
+            touch badges/.gitkeep
+            git add badges/.gitkeep
+
             echo "# Coverage badges" > README.md
-            git add .
+            git add README.md
             git commit -m "Initialize covr2gh-storage branch"
             git push origin covr2gh-storage
 
@@ -132,16 +133,14 @@ jobs:
         working-directory: base
         run: |
           temp_path <- normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/")
-          pkg_path <- file.path(temp_path, "package_base")
-          base_cov_path <- file.path(temp_path, "base_cov.RDS")
 
           base_cov <- covr::package_coverage(
             quiet = FALSE,
             clean = FALSE,
-            install_path = pkg_path
+            install_path = file.path(temp_path, "package_base")
           )
 
-          saveRDS(base_cov, base_cov_path)
+          saveRDS(base_cov, file.path(temp_path, "base_cov.RDS"))
         shell: Rscript {0}
 
       - name: Post coverage comment (PR only)
