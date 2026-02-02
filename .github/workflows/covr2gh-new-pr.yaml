@@ -6,8 +6,8 @@ on:
   pull_request:
 
 permissions:
-  pull-requests: write
-  contents: write
+  pull-requests: write # for commenting on PR
+  contents: write # for adding the badges to the covr2gh-storage branch
 
 jobs:
   covr2gh:
