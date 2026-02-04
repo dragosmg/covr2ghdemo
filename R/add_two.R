@@ -9,7 +9,7 @@
 #' add_two(2)
 #' add_two(4)
 add_two <- function(x) {
-  if (!rlang::is_double(x)) {
+  if (!is.numeric(x)) {
     cli::cli_abort(
       "`x` must be numeric. You supplied a {.class {class(x)}}"
     )
