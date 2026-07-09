@@ -9,10 +9,22 @@
 #' add_one(2)
 #' add_one(4)
 add_one <- function(x) {
-  if (!rlang::is_double(x)) {
-    cli::cli_abort(
-      "`x` must be numeric. You supplied a {.class {class(x)}}"
-    )
-  }
-  x + 1
+    if (!rlang::is_double(x)) {
+        cli::cli_abort(
+            "`x` must be numeric. You supplied a {.class {class(x)}}"
+        )
+    }
+    x + 1
+}
+
+add_two <- function(x) {
+    if (!rlang::is_double(x)) {
+        cli::cli_abort(
+            "`x` must be numeric. You supplied a {.class {class(x)}}"
+        )
+    }
+
+    x |>
+        add_one() |>
+        add_one()
 }
